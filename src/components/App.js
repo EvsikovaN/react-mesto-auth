@@ -16,6 +16,8 @@ import Login from "./Login.js";
 import ProtectedRoute from "./ProtectedRoute.js";
 import * as auth from "../utils/auth.js";
 
+//не забыть вывести на странице логин и кнопку выйти в хедере!!!!!!
+
 function App() {
   const [isEditAvatarPopupOpen, setEditAvatarPopupOpen] = useState(false);
   const [isEditProfilePopupOpen, setEditProfilePopupOpen] = useState(false);
@@ -27,7 +29,7 @@ function App() {
   const navigate = useNavigate();
   const [isSuccess, setIsSuccess] = useState(false);
   const [isStatusPopupOpen, setStatusPopupOpen] = useState(false);
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     Promise.all([api.getAllCards(), api.getProfileInfo()])
@@ -36,6 +38,16 @@ function App() {
         setCurrentUser(userInfo);
       })
       .catch((err) => console.log(err));
+  }, []);
+
+  useEffect(() => {
+    if (loggedIn) {
+      navigate('/');
+    }
+  }, [loggedIn]);
+
+  useEffect(() => {
+    tokenCheck();
   }, []);
 
   function handleCardLike(card) {
@@ -87,16 +99,11 @@ function App() {
     setAddPlacePopupOpen(true);
   };
 
-  //Не забыть вызвать где надо!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  const handleStatusPopupClick = () => {
-    setStatusPopupOpen(true);
-  };
-
   const closeAllPopups = () => {
     setEditAvatarPopupOpen(false);
     setEditProfilePopupOpen(false);
     setAddPlacePopupOpen(false);
-    setStatusPopupOpen(false)
+    setStatusPopupOpen(false);
     setSelectedCard(null);
   };
 
@@ -130,6 +137,48 @@ function App() {
       .catch((err) => console.log(err));
   };
 
+  const onRegister = (email, password) => {
+    auth.register(password, email).then((data)=>{
+      setIsSuccess(true)
+      setStatusPopupOpen(true)
+      navigate('/sign-in')
+    }).catch((error)=>{
+      setIsSuccess(false)
+      setStatusPopupOpen(true)
+      console.log(error)
+    })
+  };
+
+  const onLogin = (email, password) => {
+    auth.authorize(password,email).then((res)=>{
+      if (res.token) {
+        localStorage.setItem('jwt', res.token);
+        setEmail(email);
+        setLoggedIn(true);
+      }
+    }).catch((error)=>{
+      setStatusPopupOpen(true)
+      console.log(error)
+    })
+  }
+
+  const tokenCheck = () => {
+    let jwt = localStorage.getItem('jwt');
+    if (jwt) {
+      auth.getContent(jwt).then((res) => {
+        if (res) {
+          setEmail(res.data.email)
+          setLoggedIn(true);
+        }
+      });
+    }
+  };
+
+  const onSignOut = () => {
+    localStorage.removeItem('jwt');
+    setLoggedIn(false);
+  }
+
   return (
     <div className="page__content">
       <CurrentUserContext.Provider value={currentUser}>
@@ -138,7 +187,7 @@ function App() {
             path="/"
             element={
               <ProtectedRoute path="/" loggedIn={loggedIn}>
-                <Header />
+                <Header email={email} onSignOut={onSignOut}/>
 
                 <Main
                   onEditAvatar={handleEditAvatarClick}
@@ -155,8 +204,8 @@ function App() {
             }
           ></Route>
 
-          <Route path="/sign-up" element={<Register />}></Route>
-          <Route path="/sign-in" element={<Login />}></Route>
+          <Route path="/sign-up" element={<Register onRegister={onRegister}/>}></Route>
+          <Route path="/sign-in" element={<Login onLogin={onLogin}/>}></Route>
           <Route
             path="*"
             element={
@@ -192,7 +241,12 @@ function App() {
 
         <ImagePopup card={selectedCard} onClose={closeAllPopups} />
 
-        <InfoTooltip name='status' isOpen={isStatusPopupOpen} onClose={closeAllPopups} isSuccess={isSuccess}/>
+        <InfoTooltip
+          name="status"
+          isOpen={isStatusPopupOpen}
+          onClose={closeAllPopups}
+          isSuccess={isSuccess}
+        />
       </CurrentUserContext.Provider>
     </div>
   );

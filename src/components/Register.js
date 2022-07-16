@@ -3,13 +3,11 @@ import { useState } from "react";
 import logo from "../images/icons/logo.svg";
 import { Link } from "react-router-dom";
 
-const Register = () => {
+const Register = ({ onRegister }) => {
   const [data, setData] = useState({
     email: "",
     password: "",
   });
-
-  //const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -18,10 +16,8 @@ const Register = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (data.password === data.confirmPassword) {
-      let { email, password } = data;
-    }
-    //передать функцию
+    let { email, password } = data;
+    onRegister(email, password);
   };
 
   return (
@@ -33,7 +29,12 @@ const Register = () => {
         </Link>
       </header>
       <section className="auth">
-        <form className="auth__form" action="#" method="post" onSubmit={handleSubmit}>
+        <form
+          className="auth__form"
+          action="#"
+          method="post"
+          onSubmit={handleSubmit}
+        >
           <h2 className="auth__title">Регистрация</h2>
           <section className="auth__form-section">
             <input
@@ -67,7 +68,7 @@ const Register = () => {
           <div className="auth__question">
             <p className="auth__question-text">Уже зарегистрированы?&nbsp;</p>
             <Link to="/sign-in" className="auth__question-link">
-            Войти
+              Войти
             </Link>
           </div>
         </form>

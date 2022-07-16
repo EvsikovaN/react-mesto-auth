@@ -3,14 +3,11 @@ import { useState } from "react";
 import logo from "../images/icons/logo.svg";
 import { Link } from "react-router-dom";
 
-const Login = () => {
+const Login = ({onLogin}) => {
   const [data, setData] = useState({
     email: "",
     password: "",
-    
   });
-
-  //const [message, setMessage] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,10 +16,8 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!data.email || !data.password) {
-      return;
-    }
-    //передать функцию
+    const { email, password } = data;
+    onLogin(email,password)
   };
 
   return (
