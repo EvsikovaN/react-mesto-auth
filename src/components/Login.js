@@ -1,7 +1,5 @@
 import React from "react";
 import { useState } from "react";
-import logo from "../images/icons/logo.svg";
-import { Link } from "react-router-dom";
 
 const Login = ({onLogin}) => {
   const [data, setData] = useState({
@@ -22,12 +20,6 @@ const Login = ({onLogin}) => {
 
   return (
     <>
-      <header className="header">
-        <img src={logo} alt="логотип" className="header__logo" />
-        <Link to="/sign-up" className="header__btn">
-          Регистрация
-        </Link>
-      </header>
       <section className="auth">
         <form className="auth__form" action="#" method="post" onSubmit={handleSubmit}>
           <h2 className="auth__title">Вход</h2>

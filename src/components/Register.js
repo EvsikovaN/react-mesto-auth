@@ -1,6 +1,5 @@
 import React from "react";
 import { useState } from "react";
-import logo from "../images/icons/logo.svg";
 import { Link } from "react-router-dom";
 
 const Register = ({ onRegister }) => {
@@ -16,18 +15,12 @@ const Register = ({ onRegister }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    let { email, password } = data;
+    const { email, password } = data;
     onRegister(email, password);
   };
 
   return (
     <>
-      <header className="header">
-        <img src={logo} alt="логотип" className="header__logo" />
-        <Link to="/sign-in" className="header__btn">
-          Вход
-        </Link>
-      </header>
       <section className="auth">
         <form
           className="auth__form"

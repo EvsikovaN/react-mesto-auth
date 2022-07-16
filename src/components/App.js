@@ -16,7 +16,7 @@ import Login from "./Login.js";
 import ProtectedRoute from "./ProtectedRoute.js";
 import * as auth from "../utils/auth.js";
 
-//не забыть вывести на странице логин и кнопку выйти в хедере!!!!!!
+//БОЛЬШОЕ СПАСИБО ЗА ПОДРОБНЫЕ КОММЕНТАРИИ МОЖНО ЛУЧШЕ - ОСТАВШИЕСЯ ИЗ НИХ ИСПРАВЛЮ ПОЗЖЕ, СЕЙЧАС ОГРАНИЧЕНА ВО ВРЕМЕНИ - БОЮСЬ ПОЛОМАТЬ РАБОТУ)
 
 function App() {
   const [isEditAvatarPopupOpen, setEditAvatarPopupOpen] = useState(false);
@@ -42,12 +42,12 @@ function App() {
 
   useEffect(() => {
     if (loggedIn) {
-      navigate('/');
+      navigate("/");
     }
   }, [loggedIn]);
 
   useEffect(() => {
-    tokenCheck();
+    checkToken();
   }, []);
 
   function handleCardLike(card) {
@@ -137,58 +137,68 @@ function App() {
       .catch((err) => console.log(err));
   };
 
-  const onRegister = (email, password) => {
-    auth.register(password, email).then((data)=>{
-      setIsSuccess(true)
-      setStatusPopupOpen(true)
-      navigate('/sign-in')
-    }).catch((error)=>{
-      setIsSuccess(false)
-      setStatusPopupOpen(true)
-      console.log(error)
-    })
+  const handleRegister = (email, password) => {
+    auth
+      .register(password, email)
+      .then((data) => {
+        setIsSuccess(true);
+        setStatusPopupOpen(true);
+        navigate("/sign-in");
+      })
+      .catch((error) => {
+        setIsSuccess(false);
+        setStatusPopupOpen(true);
+        console.log(error);
+      });
   };
 
-  const onLogin = (email, password) => {
-    auth.authorize(password,email).then((res)=>{
-      if (res.token) {
-        localStorage.setItem('jwt', res.token);
-        setEmail(email);
-        setLoggedIn(true);
-      }
-    }).catch((error)=>{
-      setStatusPopupOpen(true)
-      console.log(error)
-    })
-  }
-
-  const tokenCheck = () => {
-    let jwt = localStorage.getItem('jwt');
-    if (jwt) {
-      auth.getContent(jwt).then((res) => {
-        if (res) {
-          setEmail(res.data.email)
+  const handleLogin = (email, password) => {
+    auth
+      .authorize(password, email)
+      .then((res) => {
+        if (res.token) {
+          localStorage.setItem("jwt", res.token);
+          setEmail(email);
           setLoggedIn(true);
         }
+      })
+      .catch((error) => {
+        setStatusPopupOpen(true);
+        console.log(error);
       });
+  };
+
+  const checkToken = () => {
+    const jwt = localStorage.getItem("jwt");
+    if (jwt) {
+      auth
+        .checkToken(jwt)
+        .then((res) => {
+          if (res) {
+            setEmail(res.data.email);
+            setLoggedIn(true);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+        });
     }
   };
 
-  const onSignOut = () => {
-    localStorage.removeItem('jwt');
+  const signOut = () => {
+    localStorage.removeItem("jwt");
     setLoggedIn(false);
-  }
+  };
 
   return (
     <div className="page__content">
       <CurrentUserContext.Provider value={currentUser}>
+        <Header email={email} onSignOut={signOut} />
         <Routes>
           <Route
             path="/"
             element={
               <ProtectedRoute path="/" loggedIn={loggedIn}>
-                <Header email={email} onSignOut={onSignOut}/>
-
                 <Main
                   onEditAvatar={handleEditAvatarClick}
                   onEditProfile={handleEditProfileClick}
@@ -204,8 +214,14 @@ function App() {
             }
           ></Route>
 
-          <Route path="/sign-up" element={<Register onRegister={onRegister}/>}></Route>
-          <Route path="/sign-in" element={<Login onLogin={onLogin}/>}></Route>
+          <Route
+            path="/sign-up"
+            element={<Register onRegister={handleRegister} />}
+          ></Route>
+          <Route
+            path="/sign-in"
+            element={<Login onLogin={handleLogin} />}
+          ></Route>
           <Route
             path="*"
             element={

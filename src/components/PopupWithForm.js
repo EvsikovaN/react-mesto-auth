@@ -9,7 +9,6 @@ function PopupWithForm({ title, name, submit = "Сохранить", children, i
           action="#"
           method="post"
           onSubmit={onSubmit}
-          noValidate
         >
           {children}
           <button type="submit" className="popup__save">
